@@ -8,9 +8,11 @@ import {
 } from 'react-native';
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {SharedElement} from 'react-navigation-shared-element';
+import TouchableScale from 'react-native-touchable-scale';
+import FastImage from 'react-native-fast-image';
 
-const startIconUrl =
+export const startIconUrl =
   'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Red_star.svg/1235px-Red_star.svg.png';
 
 type Movie = {
@@ -26,16 +28,29 @@ type Movie = {
 const recentMovies: Array<Movie> = [
   {
     title: 'Dunkirk',
-    art: 'https://miro.medium.com/max/3000/1*q_tbw34Yx7LhXbE0haQ9cA.jpeg',
+    art:
+      'https://i.pinimg.com/564x/44/a3/1e/44a31ea42f108a9ec2446affc5674959.jpg',
+    rating: '8.1',
   },
   {
     title: 'The Hateful Eight',
     art:
-      'https://i.insider.com/5677edf0dd0895ae788b4735?width=1136&format=jpeg',
+      'https://fsa.zobj.net/crop.php?r=6kRC61-FvSZpsxRYuHUHCsVQhHSMPjUOZjQFDUwOYl3E_X49RE4GCSM00H9HSiqOiaqSsONiVcCvNF4Xuij_stHa4ptFmD8HHpUkPCHSFb2eofFs8kbA0I6__9jO-SQ6Nh9Kk8VknNtilqqkQ4Ypn59J65156iNmazxOpGb191EZwl9-05YFqKQSV-c',
   },
   {
     title: 'The Revenant',
-    art: 'https://images.alphacoders.com/676/thumb-1920-676781.png',
+    art:
+      'https://c4.wallpaperflare.com/wallpaper/911/119/749/movie-the-revenant-leonardo-dicaprio-wallpaper-preview.jpg',
+  },
+  {
+    title: 'Inception',
+    art:
+      'https://wallup.net/wp-content/uploads/2016/05/27/72069-Inception-748x468.jpg',
+  },
+  {
+    title: 'Knives Out',
+    art:
+      'https://i1.wp.com/www.comicsbeat.com/wp-content/uploads/2019/09/KnivesOutCharacterposters.jpg?fit=1200%2C551&ssl=1',
   },
 ];
 
@@ -43,7 +58,7 @@ const popularMovies: Array<Movie> = [
   {
     title: 'Interstellar',
     art:
-      'https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_UY1200_CR90,0,630,1200_AL_.jpg',
+      'https://wallup.net/wp-content/uploads/2016/08/08/122323-Interstellar_movie.jpg',
     duration: '2h 30m',
     category: 'SF, Adventure',
     director: 'Cristopher Nolan',
@@ -53,12 +68,21 @@ const popularMovies: Array<Movie> = [
   {
     title: 'Deadpool 2',
     art:
-      'https://mypostercollection.com/wp-content/uploads/2018/04/Deadpool-2-Parody-Poster-2-John-Wick.jpg',
+      'https://wallup.net/wp-content/uploads/2016/02/235813-Deadpool-movies-748x499.jpg',
     duration: '1h 59min',
     category: 'Adventure, Action, Comedy',
     director: 'David Leitch',
     rating: '7.8',
     reviews: '189 reviews',
+  },
+  {
+    title: 'Prometheus',
+    art: 'https://cdn.hipwallpaper.com/i/75/26/dpvaP0.jpg',
+    duration: '2h 4min',
+    category: 'Adventure, Thriller, Sci-Fi',
+    director: 'Ridley Scott',
+    rating: '7.0',
+    reviews: '230 reviews',
   },
 ];
 
@@ -67,16 +91,22 @@ export default () => {
   function RecentMovie(movie: Movie) {
     return (
       <View key={movie.title}>
-        <TouchableOpacity
+        <TouchableScale
           onPress={() => goToDetails(movie)}
-          activeOpacity={0.8}>
-          <Image
-            source={{uri: movie.art}}
-            resizeMode={'cover'}
-            style={styles.recentImage}
-          />
-        </TouchableOpacity>
-        <Text style={styles.recentMovieTitle}>{movie.title}</Text>
+          activeScale={0.9}
+          friction={7}
+          useNativeDriver>
+          <SharedElement id={`item.${movie.title}.photo`}>
+            <Image
+              source={{uri: movie.art}}
+              resizeMode={'cover'}
+              style={styles.recentImage}
+            />
+          </SharedElement>
+        </TouchableScale>
+        <SharedElement id={`item.${movie.title}.title`}>
+          <Text style={styles.recentMovieTitle}>{movie.title}</Text>
+        </SharedElement>
       </View>
     );
   }
@@ -84,15 +114,19 @@ export default () => {
   function PopularMovie(movie: Movie) {
     return (
       <View key={movie.title} style={styles.popularMovieContainer}>
-        <TouchableOpacity
+        <TouchableScale
           onPress={() => goToDetails(movie)}
-          activeOpacity={0.8}>
-          <Image
-            source={{uri: movie.art}}
-            resizeMode={'cover'}
-            style={styles.popularImage}
-          />
-        </TouchableOpacity>
+          activeScale={0.9}
+          friction={7}
+          useNativeDriver>
+          <SharedElement id={`item.${movie.title}.photo`}>
+            <FastImage
+              source={{uri: movie.art}}
+              resizeMode={'cover'}
+              style={styles.popularImage}
+            />
+          </SharedElement>
+        </TouchableScale>
         <View style={styles.popularMovieDetails}>
           <Text style={styles.popularMovieTitle}>{movie.title}</Text>
           <Text style={styles.popularMovieDuration}>{movie.duration}</Text>
@@ -101,7 +135,7 @@ export default () => {
             Director: {movie.director}
           </Text>
           <View style={styles.popularMovieRatingContainer}>
-            <Image
+            <FastImage
               style={styles.popularMovieRatingIcon}
               source={{
                 uri: startIconUrl,
@@ -152,12 +186,12 @@ export default () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#242424',
     paddingTop: 56,
     paddingHorizontal: 20,
   },
   innerContainer: {
-    paddingBottom: 56,
+    paddingBottom: 56 + 20,
   },
   searchText: {
     color: 'white',
@@ -179,7 +213,7 @@ const styles = StyleSheet.create({
   },
   recentScrollContainer: {
     marginTop: 20,
-    maxHeight: 250,
+    maxHeight: 260,
   },
   recentImage: {
     height: 200,
@@ -201,8 +235,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   popularImage: {
-    height: 300,
-    width: 200,
+    height: 250,
+    width: 150,
     marginTop: 20,
   },
   popularMovieContainer: {
@@ -227,11 +261,11 @@ const styles = StyleSheet.create({
     color: 'gray',
     marginTop: 10,
     maxWidth: 150,
-    fontSize: 15,
+    fontSize: 12,
   },
   popularMovieDirector: {
     color: 'gray',
-    fontSize: 15,
+    fontSize: 12,
   },
   popularMovieRatingContainer: {
     flexDirection: 'row',
