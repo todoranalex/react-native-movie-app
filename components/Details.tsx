@@ -5,14 +5,13 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  Animated,
-  Easing,
 } from 'react-native';
 import React, {useRef, useEffect} from 'react';
 import {SharedElement} from 'react-navigation-shared-element';
 import FastImage from 'react-native-fast-image';
 import {startIconUrl} from './Home';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Animated, {Extrapolate, Easing} from 'react-native-reanimated';
 
 const {width, height} = Dimensions.get('window');
 
@@ -22,28 +21,28 @@ export default ({route, navigation}) => {
   const translateInterpolation = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [200, 0],
-    extrapolate: 'clamp',
+    extrapolate: Extrapolate.CLAMP,
   });
   const opacityInterpolation = animatedValue.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, 0, 1],
-    extrapolate: 'clamp',
+    extrapolate: Extrapolate.CLAMP,
   });
 
   useEffect(() => {
     function translate() {
       Animated.timing(animatedValue, {
         toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-        delay: 200,
-        easing: Easing.linear,
+        duration: 800,
+        easing: Easing.bezier(0.5, 1, 0.75, 1),
       }).start();
     }
     translate();
   }, []);
   return (
-    <ScrollView style={styles.scrollContainer}>
+    <ScrollView
+      style={styles.scrollContainer}
+      showsVerticalScrollIndicator={false}>
       <SharedElement id={`item.${movie.title}.photo`}>
         <FastImage
           resizeMode={'cover'}
@@ -211,6 +210,7 @@ const styles = StyleSheet.create({
   ratingMaxValue: {
     color: 'white',
     marginTop: 5,
+    alignSelf: 'flex-end',
     fontSize: 15,
   },
   synopsisLabel: {

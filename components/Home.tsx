@@ -6,7 +6,7 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {SharedElement} from 'react-navigation-shared-element';
 import TouchableScale from 'react-native-touchable-scale';
@@ -25,12 +25,13 @@ type Movie = {
   reviews?: string;
 };
 
-const recentMovies: Array<Movie> = [
+const recent: Array<Movie> = [
   {
     title: 'Dunkirk',
     art:
       'https://i.pinimg.com/564x/44/a3/1e/44a31ea42f108a9ec2446affc5674959.jpg',
     rating: '8.1',
+    director: 'Cristopher Nolan',
   },
   {
     title: 'The Hateful Eight',
@@ -54,7 +55,7 @@ const recentMovies: Array<Movie> = [
   },
 ];
 
-const popularMovies: Array<Movie> = [
+const popular: Array<Movie> = [
   {
     title: 'Interstellar',
     art:
@@ -88,6 +89,8 @@ const popularMovies: Array<Movie> = [
 
 export default () => {
   const navigation = useNavigation();
+  const [recentMovies, setRecentMovies] = useState(recent);
+  const [popularMovies, setPopularMovies] = useState(popular);
   function RecentMovie(movie: Movie) {
     return (
       <View key={movie.title}>
@@ -97,7 +100,7 @@ export default () => {
           friction={7}
           useNativeDriver>
           <SharedElement id={`item.${movie.title}.photo`}>
-            <Image
+            <FastImage
               source={{uri: movie.art}}
               resizeMode={'cover'}
               style={styles.recentImage}
@@ -156,6 +159,17 @@ export default () => {
     });
   }
 
+  function search(keyword: string): void {
+    const filteredRecent = recentMovies.filter((movie) => {
+      return movie.title.includes(keyword) || movie.director?.includes(keyword);
+    });
+    const filteredPopular = popularMovies.filter((movie) => {
+      return movie.title.includes(keyword) || movie.director?.includes(keyword);
+    });
+    setRecentMovies(filteredRecent);
+    setPopularMovies(filteredPopular);
+  }
+
   return (
     <ScrollView
       style={styles.container}
@@ -165,8 +179,19 @@ export default () => {
         style={styles.searchTextInputField}
         placeholderTextColor={'gray'}
         placeholder={'Movies, Actors, Directors...'}
+        onChangeText={(value) => {
+          if (value.length > 0) {
+            search(value);
+          } else {
+            setRecentMovies(recent);
+            setPopularMovies(popular);
+          }
+        }}
       />
-      <Text style={styles.recentText}>Recent</Text>
+      <View style={styles.recentContainer}>
+        <Text style={styles.recentText}>Recent</Text>
+        <Text style={styles.recentSeeAll}>SEE ALL</Text>
+      </View>
       <ScrollView
         style={styles.recentScrollContainer}
         horizontal={true}
@@ -175,7 +200,10 @@ export default () => {
           return RecentMovie(movie);
         })}
       </ScrollView>
-      <Text style={styles.popularText}>Popular</Text>
+      <View style={styles.recentContainer}>
+        <Text style={styles.popularText}>Popular</Text>
+        <Text style={styles.recentSeeAll}>SEE ALL</Text>
+      </View>
       {popularMovies.map((movie) => {
         return PopularMovie(movie);
       })}
@@ -205,11 +233,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'gray',
   },
+  recentContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 40,
+    alignItems: 'center',
+  },
   recentText: {
     color: 'white',
     fontSize: 20,
     fontWeight: '500',
-    marginTop: 40,
+  },
+  recentSeeAll: {
+    color: 'gray',
+    fontSize: 12,
+    alignSelf: 'flex-end',
   },
   recentScrollContainer: {
     marginTop: 20,
@@ -232,7 +270,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 20,
     fontWeight: '500',
-    marginTop: 20,
   },
   popularImage: {
     height: 250,
@@ -269,7 +306,7 @@ const styles = StyleSheet.create({
   },
   popularMovieRatingContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     marginTop: 10,
   },
   popularMovieRatingIcon: {
@@ -279,7 +316,8 @@ const styles = StyleSheet.create({
   },
   popularMovieRating: {
     color: 'white',
-    fontSize: 25,
+    alignSelf: 'flex-end',
+    fontSize: 20,
   },
   popularMovieRatingMax: {
     color: 'white',
